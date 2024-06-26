@@ -1,0 +1,53 @@
+@use "../abstracts" as *;
+
+.cb-ut-text-primary {
+  color: $primary-color;
+}
+
+.cb-ut-text-secondary {
+  color: $secondary-color;
+}
+
+.cb-ut-min-h-screen {
+  min-height: 100svh;
+}
+
+.cb-ut-flex-col-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.cb-ut-main_wrapper {
+  margin-top: 4.5rem;
+}
+
+.cb-ut-heading_1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.cb-ut-heading_2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.cb-ut-heading_3 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.cb-ut-heading_4 {
+  font-size: 1.25rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+.cb-ut-form-error {
+  color: #ff0000;
+  font-size: 0.875rem;
+}

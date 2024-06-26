@@ -1,0 +1,31 @@
+@use "../abstracts/" as *;
+
+.cb-l-book_cab_page {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  min-height: 100vh;
+  max-width: 95%;
+  margin: 0 auto;
+  padding: 6rem 0;
+
+  @include respond(small) {
+    flex-direction: column;
+  }
+}
+
+.cb-l-cab_grid {
+  max-height: 100vh;
+  overflow-y: auto;
+  width: 100%;
+  padding: 0.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  @include respond(small) {
+    max-height: unset;
+    gap: 3rem;
+  }
+}

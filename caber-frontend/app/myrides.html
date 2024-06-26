@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="../scss/main.scss" />
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.min.js"
+      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <nav class="cb-c-navbar">
+      <h1 class="cb-c-navbar__logo">Caber</h1>
+      <ul class="cb-c-navbar__menu">
+        <a class="cb-c-navbar__menu__item" href="/app/bookcab.html"
+          >Book a ride</a
+        >
+        <a class="cb-c-navbar__menu__item" href="/app/myrides.html">My Rides</a>
+        <a class="cb-c-navbar__menu__item" href="/app/user/profile.html"
+          >Profile</a
+        >
+      </ul>
+    </nav>
+
+    <main class="cb-pg-myrides_page">
+      <div class="cb-pg-myrides_rides">
+        <section>
+          <h1>Current</h1>
+          <div class="ride-card-group" id="cb-js-current-ride-group"></div>
+        </section>
+        <section>
+          <h1>Ride History</h1>
+          <div class="ride-card-group" id="cb-js-ride-history-group"></div>
+        </section>
+      </div>
+      <div class="cb-pg-myrides_bookcard">
+        <div>
+          <h3>Get a ride in minutes</h3>
+          <p>Book a cab from the web browser, no app necessary</p>
+        </div>
+        <button class="cb-c-button">Request a Ride</button>
+      </div>
+    </main>
+    <script>
+      if (!localStorage.getItem("token")) {
+        window.location.href = "/login.html";
+      }
+
+      $(document).on("click", function (e) {
+        if (e.target.id !== "js-ride-initiate-button") return;
+
+        const rideId = $(e.target).data("id");
+        fetch("http://localhost:8000/api/Passenger/initiate-ride", {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rideId }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              alert("Ride initiated");
+              location.reload();
+            }
+          });
+      });
+
+      $(document).on("click", "button", function (e) {
+        if (e.target.id !== "js-ride-cancel-button") return;
+
+        const rideId = $(e.target).data("id");
+
+        fetch("http://localhost:8000/api/Passenger/cancel-ride", {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rideId }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              alert("Ride cancelled");
+              location.reload();
+            }
+          });
+      });
+
+      $(document).on("click", "button", function (e) {
+        if (e.target.id !== "js-ride-complete-button") return;
+
+        var rating = prompt("Please enter your rating out of 5");
+        var comment = prompt("How was the ride?");
+        var distance = 10;
+
+        const rideId = $(e.target).data("id");
+
+        fetch("http://localhost:8000/api/Passenger/complete-ride", {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ rideId, rating, comment, distance }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              alert("Ride completed");
+              location.reload();
+            }
+          });
+      });
+
+      function loadRides(current, history) {
+        const rideHistoryGroup = $("#cb-js-ride-history-group");
+        const currentRideGroup = $("#cb-js-current-ride-group");
+        rideHistoryGroup.empty();
+        currentRideGroup.empty();
+
+        if (current.length === 0) {
+          currentRideGroup.append("<p>No current rides</p>");
+        } else {
+          current.forEach((ride) => {
+            const currentRideCard = `
+              <div class="cb-c-ride-card">
+                <img
+                  class="cb-c-ride-card__image"
+                  src="/assets/ride_cab.png"
+                  alt=""
+                />
+                <div class="cb-c-ride-card__ride_details">
+                  <h2 class="cb-c-ride-card__cab">${ride.cab.make} ${
+              ride.cab.model
+            }</h2>
+                  <p class="cb-c-ride-card__ride-date">${new Date(
+                    ride.startTime
+                  ).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}</p>
+                  <p class="cb-c-ride-card__status">${ride.status}</p>
+                  <div class="cb-c-ride-card__actions">
+                  ${
+                    ride.status === "Accepted"
+                      ? `
+                      <button id="js-ride-initiate-button" data-id="${ride.id}">Initiate Ride</button>
+                      <button id="js-ride-cancel-button" data-id="${ride.id}">Cancel Ride</button>
+                    `
+                      : ""
+                  }
+                    ${
+                      ride.status === "InProgress"
+                        ? `
+                      <button id="js-ride-complete-button" data-id="${ride.id}">Complete Ride</button>
+                    `
+                        : ""
+                    }
+                  </div>
+                </div>
+
+                <div class="cb-c-ride-card__price_container">
+                  <p class="cb-c-ride-card__price">${
+                    ride.status === "Completed" ? ride.fare : "---$"
+                  }</p>
+                </div>
+
+              </div>
+              `;
+            currentRideGroup.append(currentRideCard);
+          });
+        }
+
+        if (history.length === 0) {
+          rideHistoryGroup.append("<p>No ride history</p>");
+        } else {
+          history.forEach((ride) => {
+            const historyRideCard = `
+              <div class="cb-c-ride-card">
+                <img
+                  class="cb-c-ride-card__image"
+                  src="/assets/ride_cab.png"
+                  alt=""
+                />
+                <div class="cb-c-ride-card__ride_details">
+                  <h2 class="cb-c-ride-card__cab">${ride.cab.make} ${
+              ride.cab.model
+            }</h2>
+                  <p class="cb-c-ride-card__ride-date">${new Date(
+                    ride.startTime
+                  ).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}</p>
+                  <p class="cb-c-ride-card__status">${ride.status}</p>
+                </div>
+                <div class="cb-c-ride-card__price_container">
+                 <p class="cb-c-ride-card__price">${
+                   ride.status === "Completed" ? ride.fare : "---$"
+                 }</p>
+                </div>
+              </div>
+              `;
+            rideHistoryGroup.append(historyRideCard);
+          });
+        }
+      }
+
+      $(document).ready(() => {
+        fetch("http://localhost:8000/api/Passenger/ride-history", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            let currentRides = [];
+            let rideHistory = [];
+
+            data.forEach((ride) => {
+              if (
+                ["InProgress", "Accepted", "Requested"].includes(ride.status)
+              ) {
+                currentRides.push(ride);
+              } else {
+                rideHistory.push(ride);
+              }
+            });
+
+            loadRides(currentRides, rideHistory);
+          });
+      });
+    </script>
+  </body>
+</html>

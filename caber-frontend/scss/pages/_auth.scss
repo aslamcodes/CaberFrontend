@@ -1,0 +1,14 @@
+@use "../abstracts" as *;
+
+.cb-pg-auth_page {
+  min-height: 100vh;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  @include respond(small) {
+    padding: 10px;
+  }
+}
